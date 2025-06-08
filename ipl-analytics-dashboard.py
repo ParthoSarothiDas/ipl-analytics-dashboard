@@ -5,7 +5,6 @@ import plotly.express as px
 import os
 import gdown
 
-
 st.set_page_config(page_title="🏏 ipl", layout="wide")
 # -------------------------------------------------------------------------------
 #         Functional Logic
@@ -337,20 +336,19 @@ elif sidebar_radio == '🏅 Top Players':        # Top nth Batsmans & Bowlers
             st.subheader('Top Batsmen in IPL History')
             no_of_players = st.radio("Select the number of Players:", options=[10,15,20,25,30], horizontal=True, key=1)
             
-            if no_of_players == no_of_players:
-                col1, col2 = st.columns([1,2])
-                with col1.container(border=True):
-                    st.subheader('Top Batsmen')
-                    st.table(top_n_batsman(no_of_players))
-                with col2.container(border=True):
-                    st.subheader("Top 10 Batsmen in IPL History")
-                    top_batsmen = top_n_batsman(no_of_players).sort_values('Batsman Runs')
-                    fig3, ax3 = plt.subplots(figsize=(10, no_of_players*.77))
-                    ax3.barh(top_batsmen['Batsman Name'], top_batsmen['Batsman Runs'], color="skyblue")
-                    ax3.set_xlabel("Total Runs")
-                    # ax3.set_ylabel("Batsman")
-                    ax3.set_title("Top 10 Batsmen in IPL History")
-                    st.pyplot(fig3)
+            # if no_of_players == no_of_players:
+            col1, col2 = st.columns([1,2])
+            with col1.container(border=True):
+                st.subheader('Top Batsmen')
+                st.table(top_n_batsman(no_of_players))
+            with col2.container(border=True):
+                st.subheader(f"Top {no_of_players} Batsmen in IPL History")
+                top_batsmen = top_n_batsman(no_of_players).sort_values('Batsman Runs')
+                fig3, ax3 = plt.subplots(figsize=(10, no_of_players*.77))
+                ax3.barh(top_batsmen['Batsman Name'], top_batsmen['Batsman Runs'], color="skyblue")
+                ax3.set_xlabel("Total Runs")
+                ax3.set_title(f"Top {no_of_players} Batsmen in IPL History")
+                st.pyplot(fig3)
     with tab2:
         with st.container(border=True):          
             st.subheader('Top Bowlers in IPL History')
