@@ -1,11 +1,31 @@
-import streamlit as st
-import pandas as pd
-import matplotlib.pyplot as plt
-import plotly.express as px
 import os
 import gdown
+import pandas as pd
+import streamlit as st
+import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="🏏 ipl", layout="wide")
+
+# ---------->   Dataset Import <----------------------------
+matches = pd.read_csv('data/matches_clean_data.csv')
+
+@st.cache_data
+def load_deliveries():
+    file_path = 'data/deliveries_clean_data.csv'
+    if not os.path.exists(file_path):
+        # Download once if missing
+        file_id = "1uhm9ib9-X8PhxFKciaNm5y0isVVqeGlZ"
+        url = f"https://drive.google.com/uc?id={file_id}"
+        os.makedirs('data', exist_ok=True)
+        gdown.download(url, file_path, quiet=False)
+    # Read the file after confirming it exists
+    return pd.read_csv(file_path)
+# Load deliveries 
+deliveries = load_deliveries()
+
+batter_list = sorted(deliveries['batter'].unique())
+bowler_list = sorted(deliveries['bowler'].unique())
+
 # -------------------------------------------------------------------------------
 #         Functional Logic
 # -----------------------------------------------------------------------------
@@ -242,27 +262,7 @@ def batter_vs_bowler(batter_name, bowler_name):
 
 st.header(' 🏏 IPL Performance Analyzer')
 
-# Import datasets
-matches = pd.read_csv('data/matches_clean_data.csv')
 
-##########################
-# deliveries = pd.read_csv('data/deliveries_clean_data.csv')
-############
-@st.cache_data
-def load_deliveries():
-    file_path = 'data/deliveries_clean_data.csv'
-    if not os.path.exists(file_path):
-        # st.info("Downloading similarity matrix from Google Drive...")
-        file_id = "1uhm9ib9-X8PhxFKciaNm5y0isVVqeGlZ"   # https://drive.google.com/file/d/1uhm9ib9-X8PhxFKciaNm5y0isVVqeGlZ/view?usp=sharing
-        url = f"https://drive.google.com/uc?id={file_id}"
-        os.makedirs('data', exist_ok=True)
-        gdown.download(url, file_path, quiet=False)
-    return pd.read_csv(file_path)
-deliveries = load_deliveries()
-###############
-
-batter_list = sorted(deliveries['batter'].unique())
-bowler_list = sorted(deliveries['bowler'].unique())
 #--------------------------------------------------------------------------------------
 #           Sidebar
 #--------------------------------------------------------------------------------------
@@ -354,21 +354,20 @@ elif sidebar_radio == '🏅 Top Players':        # Top nth Batsmans & Bowlers
             st.subheader('Top Bowlers in IPL History')
             no_of_players = st.radio("Select the number of Players:", options=[10,15,20,25,30], horizontal=True, key=2)
             
-            if no_of_players == no_of_players:
-                col1, col2 = st.columns([1,2])
-                with col1.container(border=True):
-                    st.subheader('Top Bowlers')
-                    st.table(top_n_bowler(no_of_players))
-                with col2.container(border=True):
-                    st.subheader("Top 10 Bowlers in IPL History")
-                    top_batsmen = top_n_bowler(no_of_players).sort_values('Wickets')
-                    fig3, ax3 = plt.subplots(figsize=(10, no_of_players*.7))
-                    ax3.barh(top_batsmen['Bowler Name'], top_batsmen['Wickets'], color="skyblue")
-                    ax3.set_xlabel("Total Wickets")
-                    # ax3.set_ylabel("Bowler")
-                    ax3.set_title("Top 10 Bowlers in IPL History")
-                    st.pyplot(fig3)
-    
+            col1, col2 = st.columns([1,2])
+            with col1.container(border=True):
+                st.subheader('Top Bowlers')
+                st.table(top_n_bowler(no_of_players))
+            with col2.container(border=True):
+                st.subheader(f"Top {no_of_players} Bowlers in IPL History")
+                top_batsmen = top_n_bowler(no_of_players).sort_values('Wickets')
+                fig3, ax3 = plt.subplots(figsize=(10, no_of_players*.7))
+                ax3.barh(top_batsmen['Bowler Name'], top_batsmen['Wickets'], color="skyblue")
+                ax3.set_xlabel("Total Wickets")
+                # ax3.set_ylabel("Bowler")
+                ax3.set_title(f"Top {no_of_players} Bowlers in IPL History")
+                st.pyplot(fig3)
+
 # --------------------------------------
 #          Batsman's Performance
 #---------------------------------------
